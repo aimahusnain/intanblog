@@ -18,7 +18,7 @@ const authOptions: AuthOptions = {
       return session;
     },
   },
-  secret: "default_secret_key",
+  secret: "default_ssfdsfecret_key",
 };
 
 const nextAuth = NextAuth(authOptions);

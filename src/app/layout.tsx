@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import NextAuthProvider from '@/lib/providers/next-auth-provider'
 import NextThemesProvider from '@/lib/providers/next-themes-provider'
 import GlobalState from '@/lib/contexts'
-import { Header } from '@/components/Layout/Header'
+import Header from '@/components/Layout/Header'
 
 export const metadata: Metadata = {
   title: 'Our Blog',

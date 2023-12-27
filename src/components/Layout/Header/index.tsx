@@ -1,174 +1,114 @@
-'use client'
+"use client";
 
-import { useContext, useEffect, useState } from "react"
-import Link from "next/link"
-import { menuItems } from "@/lib/utilities/data"
-import { HeaderMenuItem } from "@/lib/utilities/types"
-import { Button } from "../../Button"
-import { ThemeToggler } from "../../ThemeToggler"
-import { signIn, signOut, useSession } from 'next-auth/react'
-import { GoogleButton } from "@/components/GoogleButton"
-import { usePathname, useRouter } from "next/navigation"
-import { GlobalContext } from "@/lib/contexts"
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { navData } from "@/lib/StaticData";
+import ThemeToggler from "../theme";
+import MobileSidebar from "./MobileSidebar";
+import SignButton from "./SignButton";
+import SkeletonNavBar from "./SkeletonNavbar"; // Import the Skeleton NavBar component
 
-export const Header = () => {
-  const [sticky, setSticky] = useState<boolean>(false)
-  const [headerOpen, setHeaderOpen] = useState<boolean>(false)
-  const { data: session } = useSession()
-  const { setSearchResults, setSearchQuery } = useContext(GlobalContext)
-  const router = useRouter()
-  const pathName = usePathname()
+const NavBar = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with isLoading set to true
+  const [sticky, setSticky] = useState<boolean>(false);
 
-  const handleStickyHeader = () => {
-    if (window.scrollY >= 80) {
-      setSticky(true)
-    } else {
-      setSticky(false)
-    }
-  }
-
-  const handleHeaderToggler = () => {
-    setHeaderOpen(!headerOpen)
+  function handleStickyNavbar() {
+    if (window.scrollY >= 80) setSticky(true);
+    else setSticky(false);
   }
 
   useEffect(() => {
-    window.addEventListener('scroll', handleStickyHeader)
-  })
+    window.addEventListener("scroll", handleStickyNavbar);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
 
-  useEffect(() => {
-    setSearchResults([])
-    setSearchQuery('')
-  }, [pathName, setSearchQuery, setSearchResults])
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    setTimeout(() => {
+      setIsLoading(false); // After a delay, set isLoading to false to show the actual NavBar
+    }, 100); // Adjust the delay time as needed (1000 milliseconds = 1 second)
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
-    <>
-      <div>
-        <header className={`top-0 left-0 z-40 flex w-full items-center bg-transparent
-        ${sticky ?
-            '!fixed !z-[9999] !bg-white !bg-opacity-80 shadow-sticky backdrop:blur-sm !transition dark:!bg-primary dark:!bg-opacity-20'
-            : 'absolute'
-          }`}
-        >
-          <div className="container">
-            <div className="relative flex items-center justify-between -mx-4">
-              <div className="max-w-full px-4 w-60 xl:mr-12">
-                <Link href={'/'} className={`text-[30px] font-extrabold cursor-pointer block w-full
-                ${sticky ?
-                    'py-5 lg:py-2'
-                    : 'py-8'
-                  }`}
-                >
-                  Our Blog
-                </Link>
-              </div>
-              <div className="flex items-center justify-between w-full px-4">
-                <div>
-                  <button
-                    onClick={handleHeaderToggler}
-                    id="headerToggler"
-                    aria-label="Mobile Menu"
-                    className="absolute right-4 top-1/2 block translate-y-[-50%] rounded-lg px-3 py-[6px] ring-primary focus:ring-2 lg:hidden"
-                  >
-                    <span
-                      className={`relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white
-                      ${headerOpen ?
-                          'top-[7px] rotate-45'
-                          : ''
-                        }`}
-                    />
-                    <span
-                      className={`relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white
-                      ${headerOpen ?
-                          'opacity-0'
-                          : ''
-                        }`}
-                    />
-                    <span
-                      className={`relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white
-                      ${headerOpen ?
-                          'top-[-8px] -rotate-45'
-                          : ''
-                        }`}
-                    />
-                  </button>
-                  <nav
-                    id="headerCollapse"
-                    className={`absolute right-0 z-30 w-[250px] rounded border-[0.5px] bg-white border-body-color/50 
-                      py-4 px-6 duration-300 dark:border-body-color/20 dark:bg-dark lg:visible lg:static lg:w-auto lg:border-none 
-                      lg:!bg-transparent lg:p-0 lg:opacity-100
-                      ${headerOpen ?
-                        'visible top-full opacity-100'
-                        : 'invisible top-[120%] opacity-0'
-                      }`}
-                  >
-                    <ul className="block lg:flex lg:space-x-12 list-none">
-                      {
-                        menuItems.map((menuItem: HeaderMenuItem) => (
-                          <li
-                            key={menuItem.id}
-                            className="relative group"
-                          >
-                            <Link
-                              href={menuItem.path}
-                              className={`flex py-2 text-base text-dark group-hover:opacity-70 dark:text-white lg:mr-0 lg:inline-flex lg:py-6 lg:px-0`}
-                            >
-                              {menuItem.label}
-                            </Link>
-                          </li>
-                        ))
-                      }
-                      <div className="flex flex-col lg:hidden gap-4 mt-10">
-                        <div className="flex items-center gap-3">
-                          <ThemeToggler />
-                        </div>
-                        {
-                          session !== null ?
-                            <div>
-                              <Button onClick={() => router.push('/create')} text="Create Post" />
-                            </div>
-                            :
-                            null
-                        }
+    <div
+    className={`top-0 shadow-lg left-0 z-40 flex w-full items-center bg-transparent
+    ${
+      sticky
+      ? "fixed z-[9999] bg-zinc-200 bg-opacity-30 backdrop-blur-sm shadow-sticky backdrop:blur-sm transition transform translate-y-0"
+      : ""
+    } 
+    `}
+    >
+      {isLoading ? (
+        <SkeletonNavBar />
+      ) : (
+        <header className="w-full h-fit py-4 px-4 md:px-14 flex justify-between items-center">
+          <Link href="/" className="font-mono">
+            <h3 className="text-3xl font-bold">Logo</h3>
+          </Link>
 
-                        {
-                          session !== null ?
-                            <div>
-                              <Button onClick={() => signOut()} text="Logout" />
-                            </div>
-                            :
-                            <div>
-                              <GoogleButton onClick={() => signIn('google')} text="Sign in with Google" />
-                            </div>
-                        }
-                      </div>
-                    </ul>
-                  </nav>
-                </div>
-                <div
-                  className="items-center justify-end gap-4 pr-16 lg:pr-0 hidden lg:flex"
-                >
-                  {
-                    session !== null ?
-                      <Button onClick={() => router.push('/create')} text="Create Post" />
-                      :
-                      null
-                  }
+          {isMobile && <MobileSidebar />}
 
-                  {
-                    session !== null ?
-                      <Button onClick={() => signOut()} text="Logout" />
-                      :
-                      <GoogleButton onClick={() => signIn('google')} text="Sign in with Google" />
-                  }
-                  <div className="flex items-center gap-3">
-                    <ThemeToggler />
-                  </div>
-                </div>
-              </div>
+          {!isMobile && (
+            <NavigationMenu>
+              <NavigationMenuList className="md:flex md:space-x-4">
+                {Object.entries(navData).map(([category, items], index) => (
+                  <NavigationMenuItem key={index}>
+                    {Array.isArray(items) ? (
+                      <NavigationMenuTrigger>{category}</NavigationMenuTrigger>
+                    ) : (
+                      <Link href={items.link} legacyBehavior passHref>
+                        <NavigationMenuLink
+                          className={`${navigationMenuTriggerStyle()}`}
+                        >
+                          {items.text}
+                        </NavigationMenuLink>
+                      </Link>
+                    )}
+                    {Array.isArray(items) && (
+                      <NavigationMenuContent className="md:w-[400px] lg:w-[500px] lg:flex lg:flex-col lg:space-y-3">
+                        <ul className="grid gap-3 p-6 md:grid-cols-2 lg:grid-cols-3">
+                          {items.map((item, itemIndex) => (
+                            <li key={itemIndex}>
+                              <Link href={`/categories${item.link}`}>{item.text}</Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    )}
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          )}
+
+          {!isMobile && (
+            <div className="flex items-center gap-5">
+              <ThemeToggler />
+
+              <SignButton />
             </div>
-          </div>
-        </header >
-      </div >
-    </>
-  )
-}
+          )}
+        </header>
+      )}
+    </div>
+  );
+};
+
+export default NavBar;
